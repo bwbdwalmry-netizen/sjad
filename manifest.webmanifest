@@ -1,0 +1,14 @@
+{
+  "name": "سجاد — بطاقة ولاء مغسلة السجاد",
+  "short_name": "سجاد",
+  "description": "بطاقة الولاء الرقمية — اجمع الأختام واكسب الغسيل المجاني",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.php",
+  "display": "standalone",
+  "background_color": "#f4faf6",
+  "theme_color": "#0e8a4d",
+  "icons": [
+    {"src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='42' fill='%230e8a4d'/><text x='96' y='128' font-size='96' text-anchor='middle' fill='white' font-family='sans-serif'>س</text></svg>", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
