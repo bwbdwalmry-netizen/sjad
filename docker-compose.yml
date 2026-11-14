@@ -1,0 +1,13 @@
+# النشر بأمر واحد: docker compose up -d
+# ثم افتح http://localhost:8080/install.php
+services:
+  sajad:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - sajad-data:/var/www/html/data
+    restart: unless-stopped
+
+volumes:
+  sajad-data:

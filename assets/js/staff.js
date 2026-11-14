@@ -1,34 +1,38 @@
-// لوحة الموظف — مسح الباركود وإضافة الأختام
+// لوحة الموظف — مسح الباركود + أختام + إحصاءات (مع CSRF)
 (function(){
 const $ = id => document.getElementById(id);
-let scanner = null, currentCode = null;
+let scanner = null, currentCode = null, csrf = '';
 
 async function post(action, data={}, isGet=false){
-  const r = await fetch('api.php?action='+action, {
+  let url = 'api.php?action='+action;
+  if (isGet) url += '&' + new URLSearchParams({csrf, ...data}).toString();
+  const r = await fetch(url, {
     method: isGet?'GET':'POST',
-    body: isGet?null:new URLSearchParams(data)
+    body: isGet?null:new URLSearchParams({csrf, ...data})
   });
   return r.json();
 }
 
 $('loginBtn').onclick = async () => {
+  $('loginErr').textContent = '';
   const d = await post('staff_login', {username: $('user').value.trim(), pin: $('pin').value.trim()});
-  if (d.ok) { $('loginBox').classList.add('hidden'); $('panel').classList.remove('hidden'); startScanner(); loadCustomers(); }
-  else $('loginErr').textContent = 'بيانات الدخول غير صحيحة';
+  if (d.ok) {
+    csrf = d.csrf;
+    $('loginBox').classList.add('hidden');
+    $('panel').classList.remove('hidden');
+    startScanner(); loadCustomers(); loadStats();
+  } else $('loginErr').textContent = d.error || 'بيانات الدخول غير صحيحة';
 };
 $('pin').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
 $('logoutBtn').onclick = async () => { await post('staff_logout'); location.reload(); };
 
-// ---- الماسح ----
 function extractCode(text){
   const m = text.match(/SJ-\d{4}/i);
   return m ? m[0].toUpperCase() : text.trim().toUpperCase();
 }
 async function onScan(text){
-  beep();
-  const code = extractCode(text);
-  stopScanner();
-  await lookup(code);
+  beep(); stopScanner();
+  await lookup(extractCode(text));
 }
 function beep(){
   try {
@@ -56,7 +60,7 @@ $('manualCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('man
 async function lookup(code){
   $('stampMsg').textContent = '';
   const d = await post('staff_scan', {code}, true);
-  if (!d.ok) { $('custCard').classList.add('hidden'); alert(d.error || 'غير موجود'); return; }
+  if (!d.ok) { $('custCard').classList.add('hidden'); alert(d.error || 'غير موجود'); startScanner(); return; }
   const c = d.customer;
   currentCode = c.code;
   $('custCard').classList.remove('hidden');
@@ -82,10 +86,19 @@ $('stampBtn').onclick = async () => {
     $('stampMsg').textContent = d.reward_redeemed
       ? 'اكتملت البطاقة — صُرفت المكافأة وبدأت بطاقة جديدة 🎉'
       : 'تمت إضافة الختم ✓ ('+d.stamps+'/'+d.goal+')';
-    setTimeout(() => { if (currentCode) lookup(currentCode); startScanner(); }, 900);
-  }
+    setTimeout(() => { if (currentCode) lookup(currentCode); startScanner(); loadStats(); }, 900);
+  } else alert(d.error || 'خطأ');
 };
 
+async function loadStats(){
+  const d = await post('stats', {}, true);
+  if (!d.ok) return;
+  csrf = d.csrf || csrf;
+  $('sCustomers').textContent = d.stats.customers;
+  $('sToday').textContent = d.stats.stamps_today;
+  $('sRewards').textContent = d.stats.rewards;
+  $('sVisits').textContent = d.stats.visits_total;
+}
 async function loadCustomers(){
   const d = await post('customers', {}, true);
   if (d.ok) $('custList').innerHTML = d.customers.map(c =>

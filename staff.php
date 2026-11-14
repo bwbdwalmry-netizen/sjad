@@ -22,7 +22,6 @@ $cfg = require __DIR__.'/config.php';
     </div>
   </header>
 
-  <!-- تسجيل الدخول -->
   <section id="loginBox" class="card">
     <h2>دخول الموظفين</h2>
     <p class="muted">هذه الصفحة للموظفين فقط</p>
@@ -32,7 +31,6 @@ $cfg = require __DIR__.'/config.php';
     <p class="error" id="loginErr"></p>
   </section>
 
-  <!-- لوحة التحكم -->
   <section id="panel" class="hidden">
     <div class="card">
       <div class="row-between">
@@ -44,7 +42,6 @@ $cfg = require __DIR__.'/config.php';
         <input id="manualCode" placeholder="أو أدخل الرقم يدويًا (مثال SJ-4821)">
         <button class="btn primary" id="manualBtn">بحث</button>
       </div>
-      <p class="muted small">وجّه الكاميرا نحو باركود بطاقة العميل</p>
     </div>
 
     <div class="card hidden" id="custCard">
@@ -62,6 +59,19 @@ $cfg = require __DIR__.'/config.php';
       <p class="muted small" id="stampMsg"></p>
       <h3 class="mt">آخر العمليات</h3>
       <ul class="log" id="cLog"></ul>
+    </div>
+
+    <div class="card">
+      <div class="row-between">
+        <h2>إحصاءات اليوم</h2>
+        <a class="btn ghost small" href="api.php?action=export_csv" style="text-decoration:none;display:inline-block">⬇️ تصدير CSV</a>
+      </div>
+      <div class="stats">
+        <div><b id="sCustomers">0</b><span>بطاقة</span></div>
+        <div><b id="sToday">0</b><span>ختم اليوم</span></div>
+        <div><b id="sRewards">0</b><span>مكافأة</span></div>
+        <div><b id="sVisits">0</b><span>زيارة كلية</span></div>
+      </div>
     </div>
 
     <div class="card">
